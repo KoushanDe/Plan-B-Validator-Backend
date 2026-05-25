@@ -4,6 +4,7 @@ import com.planbvalidator.config.PlanBProperties;
 import com.planbvalidator.domain.request.PlanBDto;
 import com.planbvalidator.domain.request.ProfileDto;
 import com.planbvalidator.domain.response.AnalyzeResponse;
+import com.planbvalidator.domain.response.QuestionnaireScoreResponse;
 import com.planbvalidator.llm.LlmNarrativeResult;
 import com.planbvalidator.market.MarketValueAssessment;
 import com.planbvalidator.pipeline.AnalysisPipelineMemory;
@@ -52,6 +53,7 @@ public class ReportComposer {
         var resolvedPlanB = memory.request().planB();
         ProfileMergeResult mergeResult = memory.profileMergeResult();
         ResumeProfileExtraction resumeProfile = memory.resumeProfileExtraction();
+        QuestionnaireScoreResponse psychologyAssessment = memory.psychology();
 
         return new AnalyzeResponse(
                 requestId,
@@ -63,6 +65,7 @@ public class ReportComposer {
                 scoringResult.runwayMonths(),
                 scoringResult.scoreBreakdown(),
                 scoringResult.opportunityCost().toMap(),
+                psychologyAssessment,
                 narrative.recommendationSummary(),
                 limit(narrative.majorReasons()),
                 limit(narrative.redFlags()),

@@ -344,6 +344,7 @@ When `false`, skips Gemini web research and hiring re-entry calls.
 | `runwayMonths` | double | Scoring runway (side hustle: net burn; see scoring section) |
 | `scoreBreakdown` | object | `financialRunway`, `marketFeasibility`, `riskTolerance`, `timelinePressure`, `reversibility` |
 | `opportunityCost` | object | Deterministic opportunity-cost metric map |
+| `psychologyAssessment` | object | PSYCHOLOGY pipeline output (same shape as `POST /v1/questionnaire/score`) |
 | `recommendationSummary` | string | Core narrative |
 | `majorReasons` | string[] | |
 | `redFlags` | string[] | |
@@ -365,6 +366,20 @@ When `false`, skips Gemini web research and hiring re-entry calls.
 | `resolvedPlanB` | object | Final plan B (may include derived `engagementMode`) |
 | `profileFieldSources` | map | `form` / `resume` per field |
 | `resumeProfileExtraction` | object | Raw resume parse when PDF used |
+
+#### `psychologyAssessment`
+
+Always present on successful analyze (PSYCHOLOGY pipeline stage). Same JSON as `POST /v1/questionnaire/score`:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `riskProfile` | string | `conservative`, `moderate_risk_taker`, or `aggressive_experimenter` |
+| `scores` | map | Per-question normalized scores 0–100; keys are question ids (e.g. `uncertainty_tolerance`) |
+| `summary` | string | Human-readable psychology summary |
+| `riskTakingPotential` | int | 0–10 composite |
+| `founderMindset` | int | 0–10 composite |
+
+Feeds `scoreBreakdown.riskTolerance` and psychology-adjusted runway in scoring.
 
 #### `currentMarketConditionForHiring` (when quitting)
 
@@ -391,6 +406,7 @@ Feeds **reversibility** sub-score (not a user checkbox).
 | Verdict hero | `overallVerdict`, `feasibilityScore`, `riskScore`, `confidence` |
 | Runway card | `runwayMonths`, `scoreBreakdown.financialRunway` |
 | Score breakdown | `scoreBreakdown` (all five sub-scores) |
+| Psychology | `psychologyAssessment` — `riskProfile`, `scores`, `summary`, `riskTakingPotential`, `founderMindset` |
 | Opportunity cost | `opportunityCost` |
 | Recommendation | `recommendationSummary`, `majorReasons`, `redFlags`, `nextSteps` |
 | Deep insight | `personalitySummary`, `expectedFailureMode`, `safestNextMove`, `suggestedFallbackPlan` |
@@ -532,6 +548,14 @@ interface AnalyzeRequest {
   researchOptions?: { enableResearch?: boolean };
 }
 
+interface PsychologyAssessment {
+  riskProfile: string;
+  scores: Record<string, number>;
+  summary: string;
+  riskTakingPotential: number;
+  founderMindset: number;
+}
+
 interface ReentryGapOutlook {
   gap_months: number;
   gap_label: string;
@@ -541,6 +565,8 @@ interface ReentryGapOutlook {
   typical_weeks_to_offer_max?: number;
   notes: string;
 }
+
+// AnalyzeResponse.psychologyAssessment: PsychologyAssessment
 
 interface CurrentMarketConditionForHiring {
   summary: string;

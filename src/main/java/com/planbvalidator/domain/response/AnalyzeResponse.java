@@ -17,6 +17,7 @@ public record AnalyzeResponse(
         double runwayMonths,
         ScoreBreakdown scoreBreakdown,
         Map<String, Object> opportunityCost,
+        QuestionnaireScoreResponse psychologyAssessment,
         String recommendationSummary,
         List<String> majorReasons,
         List<String> redFlags,

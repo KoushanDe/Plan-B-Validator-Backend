@@ -3,6 +3,7 @@ package com.planbvalidator.reporting;
 import com.planbvalidator.config.PlanBProperties;
 import com.planbvalidator.domain.common.ConfidenceLevel;
 import com.planbvalidator.domain.common.Verdict;
+import com.planbvalidator.domain.response.QuestionnaireScoreResponse;
 import com.planbvalidator.llm.LlmNarrativeResult;
 import com.planbvalidator.market.MarketValueAssessment;
 import com.planbvalidator.pipeline.AnalysisPipelineMemory;
@@ -45,6 +46,29 @@ class ReportComposerTest {
                 emptyNarrative(), research, null, marketValue, memory);
 
         assertEquals("Web Plan B notes", response.planBRoiSummary());
+    }
+
+    @Test
+    void shouldIncludePsychologyAssessmentFromPipeline() {
+        var request = com.planbvalidator.TestFixtures.sampleAnalyzeRequest();
+        var memory = new AnalysisPipelineMemory(request);
+        var psychology = new QuestionnaireScoreResponse(
+                "moderate_risk_taker",
+                Map.of("uncertainty_tolerance", 75, "discipline", 60),
+                "Moderate uncertainty tolerance.",
+                7,
+                6);
+        memory.setPsychology(psychology);
+
+        var response = composer.compose(
+                "id", 1L, Map.of(), Map.of(), sampleScoring(), emptyNarrative(),
+                null, null, null, memory);
+
+        assertEquals(psychology.riskProfile(), response.psychologyAssessment().riskProfile());
+        assertEquals(psychology.riskTakingPotential(), response.psychologyAssessment().riskTakingPotential());
+        assertEquals(psychology.founderMindset(), response.psychologyAssessment().founderMindset());
+        assertEquals(psychology.summary(), response.psychologyAssessment().summary());
+        assertTrue(response.psychologyAssessment().scores().containsKey("uncertainty_tolerance"));
     }
 
     @Test
