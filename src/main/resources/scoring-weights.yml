@@ -1,0 +1,6 @@
+weights:
+  financial_runway: 0.35
+  reversibility: 0.20
+  market_feasibility: 0.20
+  risk_tolerance: 0.15
+  timeline_pressure: 0.10

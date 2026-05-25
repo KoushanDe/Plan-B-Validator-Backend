@@ -1,0 +1,189 @@
+logging:
+  level:
+    com.planbvalidator.pipeline.AnalyzePipeline: INFO
+    com.planbvalidator.service.AnalyzeOrchestrator: INFO
+    com.planbvalidator.research: INFO
+    com.planbvalidator.llm: INFO
+    com.planbvalidator.resume: INFO
+    com.planbvalidator.market: INFO
+
+spring:
+  application:
+    name: plan-b-validator-api
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+planb:
+  currency:
+    rates-to-inr:
+      INR: 1.0
+      AED: 26.06
+      USD: 95.70
+      EUR: 111.39
+      GBP: 128.79
+      SGD: 74.30
+      SAR: 25.52
+      QAR: 26.15
+      OMR: 248.50
+      KWD: 311.00
+      BHD: 254.00
+      CAD: 70.90
+      AUD: 61.70
+      NZD: 58.00
+      CHF: 108.80
+      THB: 2.73
+      MYR: 20.40
+      HKD: 12.30
+      JPY: 0.64
+      CNY: 13.30
+      PHP: 1.71
+      IDR: 0.00605
+      VND: 0.00377
+      LKR: 0.33
+      NPR: 0.72
+      BDT: 0.82
+  research:
+    enabled: true
+    provider: gemini
+    timeout-ms: 30000
+    base-url: https://generativelanguage.googleapis.com
+    model: ${GEMINI_RESEARCH_MODEL:gemini-2.5-flash}
+  openai:
+    enabled: true
+    model: ${OPENAI_MODEL:gpt-4.1}
+    timeout-ms: 20000
+    base-url: https://api.openai.com
+  gemini:
+    enabled: true
+    model: ${GEMINI_MODEL:gemini-2.5-pro}
+    timeout-ms: 25000
+    base-url: https://generativelanguage.googleapis.com
+  rate-limit:
+    analyze-per-user-requests: 1
+    analyze-per-user-window-minutes: 5
+    analyze-global-requests-per-minute: 5
+  disclaimer: "This output is decision support, not financial, legal, or psychological advice."
+
+  # Runway: liquid savings / (monthlyExpenses + monthly debt payments). Classification bands (months)
+  # follow common emergency-fund guidance (3 / 6 / 12 month rules of thumb).
+  runway:
+    classification-severe-max-months: 3
+    classification-high-risk-max-months: 6
+    classification-moderate-max-months: 12
+
+  psychology:
+    risk-taking-dimensions:
+      - uncertainty_tolerance
+      - uncertainty_stamina
+      - stress_recovery
+      - financial_resilience
+    founder-mindset-dimensions:
+      - discipline
+      - routine_adherence
+      - setback_recovery
+      - uncertainty_stamina
+      - self_directed_motivation
+    profile-bands:
+      conservative-max: 45
+      aggressive-min: 70
+
+  scoring:
+    weights:
+      financial-runway: 0.35
+      reversibility: 0.20
+      market-feasibility: 0.20
+      risk-tolerance: 0.15
+      timeline-pressure: 0.10
+    thresholds:
+      runway-buckets:
+        - max-effective-months: 3
+          score: 20
+        - max-effective-months: 6
+          score: 35
+        - max-effective-months: 12
+          score: 58
+        - max-effective-months: 999
+          score: 85
+      psychology:
+        score-midpoint: 5
+        # Low risk-taking / founder scores reduce effective runway months (anxious users need more buffer).
+        effective-months-per-risk-point: 0.6
+        effective-months-per-founder-point: 0.3
+        runway-subscore-bonus-per-combined-point: 0
+      reversibility:
+        base-score: 50
+        keep-job-bonus: 35
+        full-time-leap-bonus: 5
+        reentry-score-high-threshold: 70
+        reentry-high-bonus: 15
+        reentry-score-moderate-threshold: 50
+        reentry-moderate-bonus: 8
+        reentry-score-low-threshold: 35
+        reentry-low-penalty: -5
+        reentry-unavailable-penalty: -3
+        experienced-years-min: 5
+        experienced-bonus: 5
+      timeline:
+        base-score: 80
+        aggressive-timeline-months: 3
+        aggressive-penalty: 35
+        moderate-timeline-months: 6
+        moderate-penalty: 20
+        relaxed-timeline-months: 9
+        relaxed-penalty: 10
+        short-runway-months: 6
+        short-runway-aggressive-timeline-penalty: 20
+        no-income-at-3-months-penalty: 15
+        full-time-leap-penalty: 15
+      market:
+        base-score: 60
+        income-meets-min-at-6-months-bonus: 10
+        income-meets-min-at-12-months-bonus: 10
+        no-income-at-3-months-penalty: 12
+        web-competitiveness-weight: 0.20
+        resume-market-value-weight-with-web: 0.05
+        resume-market-value-weight-without-web: 0.15
+        opportunity-cost-score-high-threshold: 55
+        high-opportunity-cost-penalty: 10
+        opportunity-cost-score-low-threshold: 35
+        low-opportunity-cost-bonus: 5
+        income-roadmap-realism-weight: 0.30
+        salary-disagreement-penalty: 6
+        risk-factor-penalty-each: 2
+        risk-factor-penalty-cap: 10
+        sentiment-positive: 8
+        sentiment-moderately-positive: 4
+        sentiment-moderately-negative: -5
+        sentiment-negative: -10
+      verdict:
+        hard-veto-runway-months: 3
+        take-leap-min-feasibility: 75
+        take-leap-max-risk: 40
+        caution-min-feasibility: 55
+        caution-max-risk: 65
+        delay-min-feasibility: 40
+        delay-min-runway-months: 6
+      risk-adjustments:
+        high-opportunity-cost-threshold: 55
+        high-opportunity-cost-bonus: 8
+        founder-mindset-risk-points-each: 3
+        dependent-points-each: 5
+        dependent-cap: 15
+        debt-ratio-multiplier: 10
+        debt-cap: 15
+        family-pressure-min-level: 4
+        family-pressure-bonus: 8
+        runway-below-acceptable-penalty: 15
+        side-hustle-bonus: 5
+        full-time-leap-bonus: 12
+    income-ramp:
+      at-3-months-fraction: 0.10
+      at-6-months-fraction: 0.45

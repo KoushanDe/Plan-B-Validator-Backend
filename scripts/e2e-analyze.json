@@ -1,0 +1,47 @@
+{
+  "profile": {
+    "currentProfession": "Backend Engineer",
+    "industry": "Fintech",
+    "yearsExperience": 4,
+    "country": "India",
+    "city": "Bengaluru"
+  },
+  "financials": {
+    "monthlyIncome": 180000,
+    "liquidSavings": 900000,
+    "monthlyExpenses": 65000,
+    "dependents": 0,
+    "debtObligations": 0
+  },
+  "planB": {
+    "title": "AI Freelance Consulting",
+    "description": "Evening and weekend AI consulting for startups",
+    "reason": "Build independent income while keeping salary safety net",
+    "timelineMonths": 9,
+    "iWillQuitMyJob": false,
+    "expectedIncome3Months": 15000,
+    "expectedIncome6Months": 55000,
+    "expectedIncome12Months": 120000
+  },
+  "constraints": {
+    "successDefinition": "3 paying clients and 1L+ monthly side income",
+    "biggestFear": "Burnout from dual workload",
+    "acceptableDownside": "Pause Plan B if health suffers",
+    "minimumAcceptableSalary": 100000,
+    "acceptableMonthsWithoutIncome": 4,
+    "familyPressureLevel": 2
+  },
+  "psychology": {
+    "uncertaintyTolerance": 4,
+    "discipline": 4,
+    "stressRecovery": 3,
+    "validationDependency": 2,
+    "impulsiveness": 2,
+    "routineAdherence": 4,
+    "setbackRecovery": 4,
+    "uncertaintyStamina": 4,
+    "financialResilience": 4,
+    "selfDirectedMotivation": 5
+  },
+  "researchOptions": { "enableResearch": true }
+}

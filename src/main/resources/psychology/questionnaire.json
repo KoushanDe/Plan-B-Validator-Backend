@@ -1,0 +1,71 @@
+{
+  "scale": {
+    "1": "Strongly disagree",
+    "2": "Disagree",
+    "3": "Neutral",
+    "4": "Agree",
+    "5": "Strongly agree"
+  },
+  "questions": [
+    {
+      "id": "uncertainty_tolerance",
+      "field": "uncertaintyTolerance",
+      "question": "I can keep working on my Plan B even when the next few months feel unclear.",
+      "invert": false
+    },
+    {
+      "id": "discipline",
+      "field": "discipline",
+      "question": "I follow through on goals I set for myself, even when no one is checking on me.",
+      "invert": false
+    },
+    {
+      "id": "stress_recovery",
+      "field": "stressRecovery",
+      "question": "After a very stressful week, I usually bounce back within a few days.",
+      "invert": false
+    },
+    {
+      "id": "validation_dependency",
+      "field": "validationDependency",
+      "question": "I need frequent reassurance from others before I feel sure I am on the right path.",
+      "invert": true
+    },
+    {
+      "id": "impulsiveness",
+      "field": "impulsiveness",
+      "question": "I make big career or money decisions on impulse, without thinking them through.",
+      "invert": true
+    },
+    {
+      "id": "routine_adherence",
+      "field": "routineAdherence",
+      "question": "I stick to a weekly routine that moves my most important goals forward.",
+      "invert": false
+    },
+    {
+      "id": "setback_recovery",
+      "field": "setbackRecovery",
+      "question": "When something fails, I adjust and try again instead of giving up for a long time.",
+      "invert": false
+    },
+    {
+      "id": "uncertainty_stamina",
+      "field": "uncertaintyStamina",
+      "question": "I can stay focused on a long transition (six months or more) without burning out.",
+      "invert": false
+    },
+    {
+      "id": "financial_resilience",
+      "field": "financialResilience",
+      "question": "If my income dropped for a few months, I would stay calm and follow a plan instead of panicking.",
+      "invert": false
+    },
+    {
+      "id": "self_directed_motivation",
+      "field": "selfDirectedMotivation",
+      "question": "I can push my Plan B forward without a manager, fixed office, or a team telling me what to do next.",
+      "invert": false
+    }
+  ]
+}
