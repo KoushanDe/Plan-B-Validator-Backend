@@ -29,4 +29,4 @@ GEMINI_RESEARCH_MODEL=gemini-2.5-flash
 
 ## Primary endpoint
 
-`POST /v1/analyze` — JSON or multipart (optional resume PDF). Typical response time 30–90s; use a 240s client timeout.
+`POST /v1/analyze` — JSON or multipart (optional resume PDF). Typical response time 30–90s; use a 240s client timeout
