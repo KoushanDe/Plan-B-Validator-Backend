@@ -24,6 +24,8 @@ public class OpenAiResumeProfileParserService {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAiResumeProfileParserService.class);
     private static final int MAX_RESUME_CHARS = 12_000;
+    private static final int DEFAULT_PARSE_ATTEMPTS = 3;
+    private static final long RETRY_BACKOFF_MS = 400L;
 
     private final ObjectMapper objectMapper;
     private final WebClient webClient;
@@ -47,9 +49,35 @@ public class OpenAiResumeProfileParserService {
     }
 
     public Optional<ResumeProfileExtraction> parse(String resumeText) {
+        return parseWithRetries(resumeText, DEFAULT_PARSE_ATTEMPTS);
+    }
+
+    /**
+     * Retries transient OpenAI failures (e.g. connection reset) when a resume PDF was provided.
+     */
+    public Optional<ResumeProfileExtraction> parseWithRetries(String resumeText, int maxAttempts) {
         if (!isConfigured() || resumeText == null || resumeText.isBlank()) {
             return Optional.empty();
         }
+        int attempts = Math.max(1, maxAttempts);
+        for (int attempt = 1; attempt <= attempts; attempt++) {
+            Optional<ResumeProfileExtraction> result = parseOnce(resumeText);
+            if (result.isPresent()) {
+                if (attempt > 1) {
+                    log.info("openai event=resume_profile_recovered attempt={}/{}", attempt, attempts);
+                }
+                return result;
+            }
+            if (attempt < attempts) {
+                log.warn("openai event=resume_profile_retry attempt={}/{}", attempt, attempts);
+                sleepQuietly(RETRY_BACKOFF_MS * attempt);
+            }
+        }
+        log.warn("openai event=resume_profile_exhausted attempts={}", attempts);
+        return Optional.empty();
+    }
+
+    private Optional<ResumeProfileExtraction> parseOnce(String resumeText) {
         try {
             Map<String, Object> payload = new LinkedHashMap<>();
             payload.put("resume_text", truncate(resumeText, MAX_RESUME_CHARS));
@@ -83,6 +111,14 @@ public class OpenAiResumeProfileParserService {
         } catch (Exception e) {
             log.warn("openai event=resume_profile_failed error={}", e.toString(), e);
             return Optional.empty();
+        }
+    }
+
+    private static void sleepQuietly(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

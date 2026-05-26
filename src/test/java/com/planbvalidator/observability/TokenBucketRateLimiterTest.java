@@ -19,11 +19,29 @@ class TokenBucketRateLimiterTest {
         );
         var limiter = new TokenBucketRateLimiter(props);
 
-        assertTrue(limiter.tryConsume("user-a").isEmpty());
-        assertTrue(limiter.tryConsume("user-a").isEmpty());
-        assertEquals(TokenBucketRateLimiter.LimitScope.PER_USER, limiter.tryConsume("user-a").orElseThrow());
+        assertTrue(limiter.wouldExceed("user-a").isEmpty());
+        limiter.recordSuccessfulAnalyze("user-a");
+        assertTrue(limiter.wouldExceed("user-a").isEmpty());
+        limiter.recordSuccessfulAnalyze("user-a");
+        assertEquals(TokenBucketRateLimiter.LimitScope.PER_USER, limiter.wouldExceed("user-a").orElseThrow());
 
-        assertTrue(limiter.tryConsume("user-b").isEmpty());
+        assertTrue(limiter.wouldExceed("user-b").isEmpty());
+    }
+
+    @Test
+    void failedAnalyzeDoesNotConsumeQuota() {
+        var props = new PlanBProperties(
+                null, null, null,
+                new PlanBProperties.RateLimit(1, 5, 10),
+                null
+        );
+        var limiter = new TokenBucketRateLimiter(props);
+
+        assertTrue(limiter.wouldExceed("user-a").isEmpty());
+        // Simulate 500/400 — no recordSuccessfulAnalyze
+        assertTrue(limiter.wouldExceed("user-a").isEmpty());
+        limiter.recordSuccessfulAnalyze("user-a");
+        assertEquals(TokenBucketRateLimiter.LimitScope.PER_USER, limiter.wouldExceed("user-a").orElseThrow());
     }
 
     @Test
@@ -35,9 +53,11 @@ class TokenBucketRateLimiterTest {
         );
         var limiter = new TokenBucketRateLimiter(props);
 
-        assertTrue(limiter.tryConsume("user-a").isEmpty());
-        assertTrue(limiter.tryConsume("user-b").isEmpty());
-        assertEquals(TokenBucketRateLimiter.LimitScope.GLOBAL, limiter.tryConsume("user-c").orElseThrow());
+        assertTrue(limiter.wouldExceed("user-a").isEmpty());
+        limiter.recordSuccessfulAnalyze("user-a");
+        assertTrue(limiter.wouldExceed("user-b").isEmpty());
+        limiter.recordSuccessfulAnalyze("user-b");
+        assertEquals(TokenBucketRateLimiter.LimitScope.GLOBAL, limiter.wouldExceed("user-c").orElseThrow());
     }
 
     @Test

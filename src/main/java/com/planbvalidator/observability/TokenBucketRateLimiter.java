@@ -37,20 +37,33 @@ public class TokenBucketRateLimiter {
     }
 
     /**
-     * @return empty if allowed; otherwise which limit was exceeded
+     * Checks capacity without consuming (call before handling analyze).
+     *
+     * @return empty if a successful analyze could be recorded; otherwise which limit would be exceeded
      */
-    public Optional<LimitScope> tryConsume(String userKey) {
-        Bucket userBucket = perUserBuckets.computeIfAbsent(userKey,
-                ignored -> newBucket(perUserLimit, Duration.ofMinutes(perUserWindowMinutes)));
+    public Optional<LimitScope> wouldExceed(String userKey) {
+        Bucket userBucket = userBucket(userKey);
         if (!globalBucket.estimateAbilityToConsume(1).canBeConsumed()) {
             return Optional.of(LimitScope.GLOBAL);
         }
         if (!userBucket.estimateAbilityToConsume(1).canBeConsumed()) {
             return Optional.of(LimitScope.PER_USER);
         }
+        return Optional.empty();
+    }
+
+    /**
+     * Consumes one analyze slot on both buckets. Call only after {@code POST /v1/analyze} returns HTTP 200.
+     */
+    public void recordSuccessfulAnalyze(String userKey) {
+        Bucket userBucket = userBucket(userKey);
         globalBucket.tryConsume(1);
         userBucket.tryConsume(1);
-        return Optional.empty();
+    }
+
+    private Bucket userBucket(String userKey) {
+        return perUserBuckets.computeIfAbsent(userKey,
+                ignored -> newBucket(perUserLimit, Duration.ofMinutes(perUserWindowMinutes)));
     }
 
     int perUserLimit() {

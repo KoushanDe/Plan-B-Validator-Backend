@@ -42,7 +42,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String userKey = resolveUserKey(request);
-        Optional<TokenBucketRateLimiter.LimitScope> exceeded = rateLimiter.tryConsume(userKey);
+        Optional<TokenBucketRateLimiter.LimitScope> exceeded = rateLimiter.wouldExceed(userKey);
 
         if (exceeded.isPresent()) {
             String requestId = String.valueOf(request.getAttribute("request_id"));
@@ -70,7 +70,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
             ));
             return;
         }
+
         filterChain.doFilter(request, response);
+
+        if (response.getStatus() == HttpServletResponse.SC_OK) {
+            rateLimiter.recordSuccessfulAnalyze(userKey);
+        }
     }
 
     static boolean isAnalyzeRequest(HttpServletRequest request) {

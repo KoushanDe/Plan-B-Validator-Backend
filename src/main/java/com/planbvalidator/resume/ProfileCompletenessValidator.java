@@ -8,6 +8,15 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class ProfileCompletenessValidator {
 
+    public boolean isComplete(ProfileDto profile) {
+        return hasText(profile.currentProfession())
+                && hasText(profile.industry())
+                && profile.yearsExperience() != null
+                && profile.yearsExperience() > 0
+                && hasText(profile.country())
+                && hasText(profile.city());
+    }
+
     public void requireComplete(ProfileDto profile) {
         if (!hasText(profile.currentProfession())) {
             throw badRequest("profile.currentProfession is required (provide in form or resume)");

@@ -67,9 +67,9 @@ planb:
     timeout-ms: 25000
     base-url: https://generativelanguage.googleapis.com
   rate-limit:
-    analyze-per-user-requests: 1
+    analyze-per-user-requests: 2
     analyze-per-user-window-minutes: 5
-    analyze-global-requests-per-minute: 5
+    analyze-global-requests-per-minute: 8
   disclaimer: "This output is decision support, not financial, legal, or psychological advice."
 
   # Runway: liquid savings / (monthlyExpenses + monthly debt payments). Classification bands (months)

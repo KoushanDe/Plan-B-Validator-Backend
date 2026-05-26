@@ -185,7 +185,9 @@ Applies **only** to `POST /v1/analyze`:
 | Per user | **1 request / 5 minutes** | `X-User-Id` header, else client IP (`X-Forwarded-For` first hop, else `remoteAddr`) |
 | Global | **5 requests / minute** | All users combined |
 
-Both limits must pass. On 429, response includes `Retry-After` (300s per-user, 60s global).
+Both limits must pass before the request is handled. On 429, response includes `Retry-After` (300s per-user, 60s global).
+
+**Quota is consumed only on HTTP 200** — failed analyze calls (4xx, 5xx, including resume parse failure or validation errors) do not count toward per-user or global limits.
 
 Configure in `application.yml` under `planb.rate-limit`.
 

@@ -28,7 +28,9 @@ import com.planbvalidator.scoring.RunwayService;
 import com.planbvalidator.scoring.ScoringEngine;
 import com.planbvalidator.scoring.ScoringResult;
 import com.planbvalidator.validation.SanitizationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -351,12 +353,21 @@ public class AnalyzeOrchestrator {
             PipelineLogger.stageCompleted(stage, duration,
                     "profession=" + mergeResult.mergedProfile().currentProfession()
                             + " sources=" + mergeResult.fieldSources());
+        } else if (!profileCompletenessValidator.isComplete(mergeResult.mergedProfile())) {
+            throw resumeProfileExtractionFailed(profileStatus);
         } else {
             PipelineLogger.stageDegraded(stage, duration,
                     "status=" + profileStatus + " mergedFromFormOnly=" + mergeResult.fieldSources(), null);
         }
 
         return replaceProfileAndPlanB(request, mergeResult.mergedProfile(), mergeResult.mergedPlanB());
+    }
+
+    private static ResponseStatusException resumeProfileExtractionFailed(String profileStatus) {
+        String message = "not_configured".equals(profileStatus)
+                ? "Resume profile parsing is not available. Provide profile fields in the form or configure OpenAI."
+                : "Could not extract profile from resume after 3 attempts. Please try again or provide profile fields in the form.";
+        return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, message);
     }
 
     private static AnalyzeRequest replaceProfileAndPlanB(AnalyzeRequest request, ProfileDto profile, PlanBDto planB) {
